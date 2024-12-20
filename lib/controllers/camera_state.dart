@@ -1,5 +1,6 @@
 import 'package:camera/camera.dart';
-import 'package:frc/frc.dart';
+import 'package:frc/models/detected_image.dart';
+import 'package:frc/res/enums.dart';
 
 /// This class represents the current state of a [FaceCameraController].
 class CameraState {

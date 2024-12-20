@@ -1,7 +1,10 @@
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:frc/frc.dart';
+import 'package:frc/paints/face_painter.dart';
 import 'dart:math' as math;
+
+import 'package:frc/res/builders.dart';
 
 class FaceCamera extends StatefulWidget {
   /// Set false to hide all controls.

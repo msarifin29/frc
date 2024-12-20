@@ -3,7 +3,9 @@ import 'package:camera/camera.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:frc/frc.dart';
+import 'package:frc/handlers/nv21_converter.dart';
+import 'package:frc/models/detected_image.dart';
+import 'package:google_mlkit_face_detection/google_mlkit_face_detection.dart';
 import 'package:image/image.dart' as img;
 
 class FaceIdentifier {

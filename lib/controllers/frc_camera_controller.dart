@@ -4,6 +4,9 @@ import 'dart:typed_data';
 
 import 'package:camera/camera.dart';
 import 'package:flutter/widgets.dart';
+import 'package:frc/handlers/enum_handler.dart';
+import 'package:frc/handlers/face_identifier.dart';
+import 'package:frc/res/enums.dart';
 import 'package:image/image.dart' as img;
 
 import 'package:frc/frc.dart';
@@ -197,7 +200,7 @@ class FRCController extends ValueNotifier<CameraState> {
     final CameraController? cameraController = value.cameraController;
     try {
       cameraController!.stopImageStream().whenComplete(() async {
-        await Future.delayed(const Duration(milliseconds: 500));
+        await Future.delayed(const Duration(milliseconds: 10));
         takePicture().then((XFile? file) async {
           /// Return image callback
           if (file != null) {

@@ -1,13 +1,8 @@
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 
-export 'models/detected_image.dart';
-export 'res/builders.dart';
-export 'res/enums.dart';
-export 'handlers/enum_handler.dart';
-export 'handlers/face_identifier.dart';
-export 'handlers/nv21_converter.dart';
-export 'paints/face_painter.dart';
+export 'handlers/recognizer_handler.dart';
+export 'handlers/storage.dart';
 export 'controllers/camera_state.dart';
 export 'controllers/frc_camera_controller.dart';
 export 'face_camera.dart';
