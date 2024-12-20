@@ -12,19 +12,12 @@ class FacePainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     if (face == null) return;
 
-    Paint paint;
-
-    if (face!.headEulerAngleY! > 10 || face!.headEulerAngleY! < -10) {
-      paint = Paint()
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = 3.0
-        ..color = Colors.blue;
-    } else {
-      paint = Paint()
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = 3.0
-        ..color = Colors.green;
-    }
+    final paint = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 3.0
+      ..color = (face!.headEulerAngleY! > 10 || face!.headEulerAngleY! < -10)
+          ? Colors.blue
+          : Colors.green;
 
     scaleX = size.width / imageSize.width;
     scaleY = size.height / imageSize.height;
