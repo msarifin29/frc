@@ -3,6 +3,7 @@ import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:frc/frc.dart';
+import 'package:frc_example/storage.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -200,8 +201,9 @@ class RecognitionViewState extends State<RecognitionView> {
   }
 
   void compare(Uint8List? input) async {
-    if (input != null) {
-      similarity = await service.compareImages(input, 'sample');
+    final localeImage = LocaleStorage().read('sample');
+    if (input != null && localeImage != null) {
+      similarity = await service.compareImages(input, localeImage);
 
       setState(() {});
     }

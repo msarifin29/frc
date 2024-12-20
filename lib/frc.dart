@@ -2,7 +2,6 @@ import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 
 export 'handlers/recognizer_handler.dart';
-export 'handlers/storage.dart';
 export 'controllers/camera_state.dart';
 export 'controllers/frc_camera_controller.dart';
 export 'face_camera.dart';

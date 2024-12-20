@@ -351,7 +351,7 @@ packages:
     source: hosted
     version: "3.2.2"
   shared_preferences:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: shared_preferences
       sha256: "3c7e73920c694a436afaf65ab60ce3453d91f84208d761fbd83fc21182134d93"

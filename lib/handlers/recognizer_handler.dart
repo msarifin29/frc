@@ -4,8 +4,6 @@ import 'dart:io';
 import 'dart:math';
 import 'dart:typed_data';
 
-import 'package:frc/frc.dart';
-import 'package:frc/handlers/storage.dart';
 import 'package:tflite_flutter/tflite_flutter.dart';
 import 'package:image/image.dart' as img;
 
@@ -13,7 +11,6 @@ class RecognizerHandler {
   final String modelPath;
 
   late Interpreter interpreter;
-  final localeStorage = LocaleStorage();
 
   static const int width = 112;
   static const int height = 112;
@@ -82,9 +79,8 @@ class RecognizerHandler {
     return data == null ? null : img.decodeImage(data);
   }
 
-  Future<double> compareImages(Uint8List inputImageData, String key) async {
+  Future<double> compareImages(Uint8List inputImageData, Uint8List storedImageData) async {
     img.Image? inputImage = await _decodeImage(inputImageData);
-    final storedImageData = localeStorage.read(key);
     final storedImage = await _decodeImage(storedImageData);
 
     if (inputImage == null || storedImage == null) {
