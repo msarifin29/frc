@@ -28,6 +28,7 @@ class Home extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(title: const Text('Example')),
       body: Center(
         child: Wrap(
           spacing: 50,
@@ -35,18 +36,18 @@ class Home extends StatelessWidget {
             ElevatedButton(
               onPressed: () {
                 Navigator.push(context, MaterialPageRoute(builder: (context) {
-                  return const FaceDetectionView();
+                  return const RegisterPage();
                 }));
               },
-              child: const Text('Camera View'),
+              child: const Text('Register'),
             ),
             ElevatedButton(
               onPressed: () async {
                 Navigator.push(context, MaterialPageRoute(builder: (context) {
-                  return const RecognitionView();
+                  return const RecognitionPage();
                 }));
               },
-              child: const Text('Recognition View'),
+              child: const Text('Recognition'),
             ),
           ],
         ),
@@ -55,14 +56,14 @@ class Home extends StatelessWidget {
   }
 }
 
-class FaceDetectionView extends StatefulWidget {
-  const FaceDetectionView({super.key});
+class RegisterPage extends StatefulWidget {
+  const RegisterPage({super.key});
 
   @override
-  State<FaceDetectionView> createState() => _FaceDetectionViewState();
+  State<RegisterPage> createState() => _RegisterPageState();
 }
 
-class _FaceDetectionViewState extends State<FaceDetectionView> {
+class _RegisterPageState extends State<RegisterPage> {
   File? _capturedImage;
   Uint8List? imageFile;
 
@@ -155,14 +156,14 @@ class _FaceDetectionViewState extends State<FaceDetectionView> {
   }
 }
 
-class RecognitionView extends StatefulWidget {
-  const RecognitionView({super.key});
+class RecognitionPage extends StatefulWidget {
+  const RecognitionPage({super.key});
 
   @override
-  State<RecognitionView> createState() => RecognitionViewState();
+  State<RecognitionPage> createState() => RecognitionPageState();
 }
 
-class RecognitionViewState extends State<RecognitionView> {
+class RecognitionPageState extends State<RecognitionPage> {
   Uint8List? imageFile;
 
   late FRCController controller;
