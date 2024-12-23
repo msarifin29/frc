@@ -102,7 +102,6 @@ class _FaceDetectionViewState extends State<FaceDetectionView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('example app')),
       body: Builder(
         builder: (context) {
           if (_capturedImage != null || imageFile != null) {
@@ -142,33 +141,15 @@ class _FaceDetectionViewState extends State<FaceDetectionView> {
           }
           return FaceCamera(
             controller: controller,
-            messageBuilder: (context, face) {
-              if (face == null) {
-                return _message('Place your face in the camera');
-              }
-              if (!face.wellPositioned) {
-                return _message('Center your face in the square');
-              }
-              return const SizedBox.shrink();
-            },
+            autoDisableCaptureControl: true,
           );
         },
       ),
     );
   }
 
-  Widget _message(String msg) => Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 55, vertical: 15),
-        child: Text(
-          msg,
-          textAlign: TextAlign.center,
-          style: const TextStyle(fontSize: 14, height: 1.5, fontWeight: FontWeight.w400),
-        ),
-      );
-
   @override
   void dispose() {
-    controller.dispose();
     service.close();
     super.dispose();
   }
@@ -191,12 +172,7 @@ class RecognitionViewState extends State<RecognitionView> {
   @override
   void initState() {
     service = RecognizerHandler('assets/mobile_face_net.tflite');
-    controller = FRCController(
-      autoCapture: true,
-      onCapture: (image, img) async {
-        setState(() => imageFile = img);
-      },
-    );
+    controller = FRCController(onCapture: (image, img) {});
     super.initState();
   }
 
@@ -212,7 +188,6 @@ class RecognitionViewState extends State<RecognitionView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('example app')),
       body: Builder(
         builder: (context) {
           if (imageFile != null) {
@@ -251,14 +226,9 @@ class RecognitionViewState extends State<RecognitionView> {
           }
           return FaceCamera(
             controller: controller,
-            messageBuilder: (context, face) {
-              if (face == null) {
-                return _message('Place your face in the camera');
-              }
-              if (!face.wellPositioned) {
-                return _message('Center your face in the square');
-              }
-              return const SizedBox.shrink();
+            showCaptureControl: true,
+            captureControl: (file, img) {
+              setState(() => imageFile = img);
             },
           );
         },
@@ -266,18 +236,8 @@ class RecognitionViewState extends State<RecognitionView> {
     );
   }
 
-  Widget _message(String msg) => Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 55, vertical: 15),
-        child: Text(
-          msg,
-          textAlign: TextAlign.center,
-          style: const TextStyle(fontSize: 14, height: 1.5, fontWeight: FontWeight.w400),
-        ),
-      );
-
   @override
   void dispose() {
-    controller.dispose();
     service.close();
     super.dispose();
   }

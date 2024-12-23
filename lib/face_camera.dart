@@ -1,3 +1,6 @@
+import 'dart:io';
+import 'dart:typed_data';
+
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:frc/frc.dart';
@@ -13,11 +16,17 @@ class FaceCamera extends StatefulWidget {
   /// Set false to hide capture control icon.
   final bool showCaptureControl;
 
-  /// Set false to hide camera lens control icon.
-  final bool showCameraLensControl;
-
   /// Use this pass a message above the camera.
-  final String? message;
+  final String message;
+
+  /// Use this pass a message above face not detected.
+  final String emptyFaceMessage;
+
+  /// Use this pass a message above description position.
+  final String positionMessage;
+
+  /// Use this pass a message center face into frame.
+  final String centerMessage;
 
   /// Style applied to the message widget.
   final TextStyle messageStyle;
@@ -25,33 +34,30 @@ class FaceCamera extends StatefulWidget {
   /// Use this to build custom widgets for capture control.
   final CaptureControlBuilder? captureControlBuilder;
 
-  /// Use this to build custom messages based on face position.
-  final MessageBuilder? messageBuilder;
-
-  /// Use this to pass an asset image when IndicatorShape is set to image.
-  final String? indicatorAssetImage;
-
-  /// Use this to build custom widgets for the face indicator
-  final IndicatorBuilder? indicatorBuilder;
-
   /// Set true to automatically disable capture control widget when no face is detected.
   final bool autoDisableCaptureControl;
 
   /// The controller for the [FaceCamera] widget.
   final FRCController controller;
 
+  /// Use this to build custom widgets for the description widget
+  final Widget? descriptionWidget;
+
+  final void Function(File? image, Uint8List? imageCropped)? captureControl;
+
   const FaceCamera({
     required this.controller,
     this.showControls = true,
-    this.showCaptureControl = true,
-    this.showCameraLensControl = false,
-    this.message,
-    this.messageStyle = const TextStyle(fontSize: 14, height: 1.5, fontWeight: FontWeight.w400),
+    this.showCaptureControl = false,
+    this.message = 'No Camera Detected',
+    this.messageStyle = const TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
     this.captureControlBuilder,
-    this.messageBuilder,
-    this.indicatorAssetImage,
-    this.indicatorBuilder,
     this.autoDisableCaptureControl = false,
+    this.descriptionWidget,
+    this.emptyFaceMessage = 'Face not Detected',
+    this.positionMessage = 'Please position your face in the camera frame',
+    this.centerMessage = 'Center your face in the camera',
+    this.captureControl,
     super.key,
   });
 
@@ -115,22 +121,15 @@ class _FaceCameraState extends State<FaceCamera> with WidgetsBindingObserver {
                               SizedBox(
                                 width: cameraController.value.previewSize!.width,
                                 height: cameraController.value.previewSize!.height,
-                                child: widget.indicatorBuilder?.call(
-                                        context,
-                                        value.detectedFace,
-                                        Size(
-                                          cameraController.value.previewSize!.height,
-                                          cameraController.value.previewSize!.width,
-                                        )) ??
-                                    CustomPaint(
-                                      painter: FacePainter(
-                                        face: value.detectedFace!.face,
-                                        imageSize: Size(
-                                          cameraController.value.previewSize!.height,
-                                          cameraController.value.previewSize!.width,
-                                        ),
-                                      ),
+                                child: CustomPaint(
+                                  painter: FacePainter(
+                                    face: value.detectedFace!.face,
+                                    imageSize: Size(
+                                      cameraController.value.previewSize!.height,
+                                      cameraController.value.previewSize!.width,
                                     ),
+                                  ),
+                                ),
                               ),
                             ]
                           ],
@@ -141,23 +140,40 @@ class _FaceCameraState extends State<FaceCamera> with WidgetsBindingObserver {
                 ),
               )
             ] else ...[
-              const Text(
-                'No Camera Detected',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
-              ),
+              Text(widget.message, style: widget.messageStyle),
             ],
+            Positioned(
+              top: kToolbarHeight,
+              child: widget.descriptionWidget ??
+                  Container(
+                    height: 50,
+                    width: MediaQuery.sizeOf(context).width,
+                    padding: const EdgeInsets.symmetric(horizontal: 12),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        closeButton(),
+                        if (value.detectedFace?.face == null)
+                          messageDetectedFace(widget.emptyFaceMessage)
+                        else if (value.detectedFace?.face != null &&
+                            !value.detectedFace!.wellPositioned)
+                          messageDetectedFace(widget.centerMessage),
+                      ],
+                    ),
+                  ),
+            ),
             if (widget.showControls) ...[
               Align(
                 alignment: Alignment.bottomCenter,
                 child: Padding(
-                  padding: const EdgeInsets.all(15.0),
-                  child: Row(
+                  padding: const EdgeInsets.only(bottom: 30),
+                  child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
+                      descriptionMessage(widget.positionMessage),
+                      const SizedBox(height: 50),
                       if (widget.showCaptureControl) ...[
-                        const SizedBox(width: 15),
                         _captureControlWidget(value),
-                        const SizedBox(width: 15)
                       ],
                     ],
                   ),
@@ -180,22 +196,7 @@ class _FaceCameraState extends State<FaceCamera> with WidgetsBindingObserver {
         child: CameraPreview(
           cameraController,
           child: Builder(
-            builder: (context) {
-              if (widget.messageBuilder != null) {
-                return Transform(
-                    alignment: Alignment.center,
-                    transform: Matrix4.rotationY(math.pi),
-                    child: widget.messageBuilder!.call(context, value.detectedFace));
-              }
-              if (widget.message != null) {
-                return Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 55, vertical: 15),
-                  child: Text(widget.message!,
-                      textAlign: TextAlign.center, style: widget.messageStyle),
-                );
-              }
-              return const SizedBox.shrink();
-            },
+            builder: (context) => const SizedBox.shrink(),
           ),
         ),
       );
@@ -210,23 +211,80 @@ class _FaceCameraState extends State<FaceCamera> with WidgetsBindingObserver {
   /// Determines the camera controls color.
   Color? get iconColor => widget.controller.enableControls ? null : Theme.of(context).disabledColor;
 
+  // Determines if the face is well positioned
+  bool get _wellPositioned => widget.controller.value.detectedFace?.wellPositioned ?? false;
+
   /// Display the control buttons to take pictures.
   Widget _captureControlWidget(CameraState value) {
-    return IconButton(
-      icon: widget.captureControlBuilder?.call(context, value.detectedFace) ??
-          CircleAvatar(
-            radius: 35,
-            foregroundColor: widget.controller.enableControls && !_disableCapture
-                ? null
-                : Theme.of(context).disabledColor,
-            child: const Padding(
-              padding: EdgeInsets.all(8.0),
-              child: Icon(Icons.camera_alt, size: 35),
-            ),
-          ),
-      onPressed: widget.controller.enableControls && !_disableCapture
-          ? widget.controller.captureImage
+    return InkWell(
+      onTap: !_disableCapture && _wellPositioned
+          ? () async {
+              final result = await widget.controller.captureControl();
+              widget.captureControl!(result.$1, result.$2);
+            }
           : null,
+      child: Container(
+        height: 80,
+        width: 80,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          color: _disableCapture ? Colors.grey.shade300 : Colors.white,
+        ),
+        child: Container(
+          width: 70,
+          height: 70,
+          margin: const EdgeInsets.all(4),
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color: _disableCapture ? Colors.grey.shade300 : Colors.white,
+            border: Border.all(color: Colors.black38, width: 4),
+          ),
+        ),
+      ),
+    );
+  }
+
+  /// Display a message above description message
+  Widget descriptionMessage(String msg) {
+    return Text(
+      msg,
+      style: const TextStyle(fontSize: 14, color: Colors.white),
+    );
+  }
+
+  Widget closeButton() {
+    return InkWell(
+      onTap: () => Navigator.pop(context),
+      child: Container(
+        height: 36,
+        width: 36,
+        decoration: BoxDecoration(borderRadius: BorderRadius.circular(8), color: Colors.white),
+        child: const Icon(Icons.close, color: Colors.black),
+      ),
+    );
+  }
+
+  Widget messageDetectedFace(String message) {
+    return Container(
+      height: 28,
+      padding: const EdgeInsets.symmetric(horizontal: 10),
+      decoration: BoxDecoration(
+        color: const Color(0xff182230),
+        borderRadius: BorderRadius.circular(16),
+      ),
+      alignment: Alignment.center,
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Icon(Icons.error, color: Colors.white, size: 18),
+          const SizedBox(width: 5),
+          Text(
+            message,
+            textAlign: TextAlign.center,
+            style: const TextStyle(fontSize: 12, color: Colors.white),
+          ),
+        ],
+      ),
     );
   }
 }

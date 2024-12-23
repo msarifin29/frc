@@ -200,7 +200,6 @@ class FRCController extends ValueNotifier<CameraState> {
     final CameraController? cameraController = value.cameraController;
     try {
       cameraController!.stopImageStream().whenComplete(() async {
-        await Future.delayed(const Duration(milliseconds: 10));
         takePicture().then((XFile? file) async {
           /// Return image callback
           if (file != null) {
@@ -214,6 +213,38 @@ class FRCController extends ValueNotifier<CameraState> {
     }
   }
 
+  Future<(File?, Uint8List?)> captureControl() async {
+    final CameraController? cameraController = value.cameraController;
+
+    if (cameraController == null || !cameraController.value.isInitialized) {
+      logError('Error: select a camera first.');
+      return (null, null);
+    }
+
+    if (cameraController.value.isTakingPicture) {
+      logError('A capture is already pending');
+      return (null, null);
+    }
+
+    if (cameraController.value.isStreamingImages) {
+      await cameraController.stopImageStream();
+    }
+
+    try {
+      XFile? file = await takePicture();
+      if (file == null) {
+        return (null, null);
+      }
+      final uint8List = await FaceIdentifier.cropedImage(File(file.path));
+      if (uint8List == null) {
+        return (null, null);
+      }
+      return (File(file.path), uint8List);
+    } on CameraException catch (e) {
+      _showCameraException(e);
+      return (null, null);
+    }
+  }
 /*  void onViewFinderTap(TapDownDetails details, BoxConstraints constraints) {
     if (value.cameraController == null) {
       return;
