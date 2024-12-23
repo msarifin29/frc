@@ -7,8 +7,6 @@ import 'package:frc/frc.dart';
 import 'package:frc/paints/face_painter.dart';
 import 'dart:math' as math;
 
-import 'package:frc/res/builders.dart';
-
 class FaceCamera extends StatefulWidget {
   /// Set false to hide all controls.
   final bool showControls;
@@ -31,9 +29,6 @@ class FaceCamera extends StatefulWidget {
   /// Style applied to the message widget.
   final TextStyle messageStyle;
 
-  /// Use this to build custom widgets for capture control.
-  final CaptureControlBuilder? captureControlBuilder;
-
   /// Set true to automatically disable capture control widget when no face is detected.
   final bool autoDisableCaptureControl;
 
@@ -51,7 +46,6 @@ class FaceCamera extends StatefulWidget {
     this.showCaptureControl = false,
     this.message = 'No Camera Detected',
     this.messageStyle = const TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
-    this.captureControlBuilder,
     this.autoDisableCaptureControl = false,
     this.descriptionWidget,
     this.emptyFaceMessage = 'Face not Detected',
