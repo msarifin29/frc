@@ -104,4 +104,35 @@ final localeImage = LocaleStorage().read('sample');
 await RecognizerHandler()compareImages(input, localeImage);
 ```
 
-Full example [here](example/lib/main.dart)
+* Initialize Controller 
+```dart
+FRCController(
+  onCapture: (image, img) {
+    setState(() {
+      _capturedImage = image;
+      imageFile = img;
+    });
+  },
+);
+```
+
+* use `FaceCamera `
+```dart
+FaceCamera(
+  controller: controller,
+  showCaptureControl: true,
+  captureControl: (file, img) {}
+)
+```
+
+* Use `FaceCameraCircle`
+```dart
+FaceCameraCircle(
+  controller: controller,
+  autoDisableCaptureControl: true,
+) 
+```
+
+* Don't forget to set value `autoCapture = true` and `centerPosition: true` when using `FaceCameraCircle`
+
+See full example [here.](example/lib/main.dart)
