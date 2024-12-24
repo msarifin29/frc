@@ -135,6 +135,7 @@ class _FaceCameraState extends State<FaceCamera> with WidgetsBindingObserver {
               )
             ] else ...[
               Text(widget.message, style: widget.messageStyle),
+              CustomPaint(size: size, painter: HolePainter())
             ],
             Positioned(
               top: kToolbarHeight,
