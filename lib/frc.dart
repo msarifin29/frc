@@ -5,6 +5,7 @@ export 'handlers/recognizer_handler.dart';
 export 'controllers/camera_state.dart';
 export 'controllers/frc_camera_controller.dart';
 export 'face_camera.dart';
+export 'face_camera_circle.dart';
 export 'package:google_mlkit_face_detection/google_mlkit_face_detection.dart';
 
 class Frc {

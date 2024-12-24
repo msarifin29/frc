@@ -6,6 +6,7 @@ import 'package:camera/camera.dart';
 import 'package:flutter/widgets.dart';
 import 'package:frc/handlers/enum_handler.dart';
 import 'package:frc/handlers/face_identifier.dart';
+import 'package:frc/paints/face_painter.dart';
 import 'package:frc/res/enums.dart';
 import 'package:image/image.dart' as img;
 
@@ -22,6 +23,7 @@ class FRCController extends ValueNotifier<CameraState> {
     this.orientation = CameraOrientation.portraitUp,
     required this.onCapture,
     this.onFaceDetected,
+    this.centerPosition = false,
   }) : super(CameraState.uninitialized());
 
   /// The desired resolution for the camera.
@@ -44,6 +46,11 @@ class FRCController extends ValueNotifier<CameraState> {
 
   /// Callback invoked when camera detects face.
   final void Function(Face? face)? onFaceDetected;
+
+  /// Set true to center face in the camera frame.
+  /// centerPosition is only applicable when autoCapture is true.
+  /// and using FaceCameraCircle widget.
+  final bool centerPosition;
 
   /// Gets all available camera lens and set current len
   void _getAllAvailableCameraLens() {
@@ -180,8 +187,21 @@ class FRCController extends ValueNotifier<CameraState> {
               if (result.face != null) {
                 onFaceDetected?.call(result.face);
               }
-              if (autoCapture && (result.wellPositioned || ignoreFacePositioning)) {
+              if (autoCapture &&
+                  (result.wellPositioned || ignoreFacePositioning) &&
+                  !centerPosition) {
                 captureImage();
+              }
+              if (autoCapture && centerPosition) {
+                final face = result.face;
+                if (face != null) {
+                  final x = face.boundingBox.left + face.boundingBox.width / 2;
+                  final y = face.boundingBox.top + face.boundingBox.height / 2;
+                  final isCenter = isPositionCenter(x, y);
+                  if (isCenter) {
+                    captureImage();
+                  }
+                }
               }
             } catch (e) {
               logError(e.toString());
@@ -213,6 +233,7 @@ class FRCController extends ValueNotifier<CameraState> {
     }
   }
 
+  // Capture image when press the capture button
   Future<(File?, Uint8List?)> captureControl() async {
     final CameraController? cameraController = value.cameraController;
 
@@ -245,21 +266,8 @@ class FRCController extends ValueNotifier<CameraState> {
       return (null, null);
     }
   }
-/*  void onViewFinderTap(TapDownDetails details, BoxConstraints constraints) {
-    if (value.cameraController == null) {
-      return;
-    }
 
-    final CameraController cameraController = value.cameraController!;
-
-    final offset = Offset(
-      details.localPosition.dx / constraints.maxWidth,
-      details.localPosition.dy / constraints.maxHeight,
-    );
-    cameraController.setExposurePoint(offset);
-    cameraController.setFocusPoint(offset);
-  }*/
-
+  // Initialize camera controller
   Future<void> initialize() async {
     _getAllAvailableCameraLens();
     _initCamera();

@@ -78,6 +78,7 @@ class _RegisterPageState extends State<RegisterPage> {
 
     controller = FRCController(
       autoCapture: true,
+      centerPosition: true,
       onCapture: (image, img) {
         if (img != null) {
           localeStorage.write('sample', uint8ListToListDouble(img));
@@ -140,7 +141,7 @@ class _RegisterPageState extends State<RegisterPage> {
               ),
             );
           }
-          return FaceCamera(
+          return FaceCameraCircle(
             controller: controller,
             autoDisableCaptureControl: true,
           );
